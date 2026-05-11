@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HDRFace</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css">
+  <style>
+    :root {
+      --accent:   #2563eb;
+      --accent2:  #0ea5e9;
+      --dark:     #0f172a;
+      --mid:      #475569;
+      --light:    #f8fafc;
+      --border:   #e2e8f0;
+      --radius:   12px;
+      --shadow:   0 4px 24px rgba(15,23,42,.08);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      background: #fff;
+      color: var(--dark);
+      line-height: 1.7;
+    }
+
+    .top-nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: .6rem 2rem;
+      display: flex; align-items: center; justify-content: center; gap: 2rem;
+    }
+    .top-nav a {
+      font-size: .85rem; font-weight: 500;
+      color: var(--mid); text-decoration: none;
+      transition: color .2s;
+    }
+    .top-nav a:hover { color: var(--accent); }
+
+    .hero-section {
+      background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 50%, #f5f0ff 100%);
+      padding: 5rem 1.5rem 4rem;
+      text-align: center;
+    }
+    .paper-title {
+      font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+      font-weight: 800;
+      line-height: 1.25;
+      color: var(--dark);
+      max-width: 860px;
+      margin: 0 auto 1.6rem;
+      letter-spacing: -.02em;
+    }
+    .paper-title .hl { color: var(--accent); }
+
+    .authors {
+      font-size: 1rem; color: var(--mid);
+      max-width: 720px; margin: 0 auto .5rem;
+    }
+    .authors a { color: var(--dark); font-weight: 600; text-decoration: none; }
+    .authors a:hover { color: var(--accent); }
+    .authors sup { color: var(--accent); font-size: .7em; }
+
+    .affiliations {
+      font-size: .85rem; color: #94a3b8;
+      max-width: 700px; margin: .4rem auto .3rem;
+    }
+    .emails {
+      font-size: .82rem; color: #94a3b8;
+      margin-bottom: 1.8rem;
+    }
+
+    .btn-row {
+      display: flex; flex-wrap: wrap;
+      justify-content: center; gap: .75rem;
+      margin-top: 1.4rem;
+    }
+    .btn-link {
+      display: inline-flex; align-items: center; gap: .45rem;
+      padding: .55rem 1.3rem;
+      border-radius: 999px;
+      font-size: .88rem; font-weight: 600;
+      text-decoration: none;
+      transition: all .2s;
+      border: 2px solid transparent;
+    }
+    .btn-link.primary {
+      background: var(--accent); color: #fff;
+    }
+    .btn-link.primary:hover { background: #1d4ed8; }
+    .btn-link.outline {
+      background: #fff; color: var(--dark);
+      border-color: var(--border);
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .btn-link.outline:hover { border-color: var(--accent); color: var(--accent); }
+
+    .page-section { padding: 5rem 1.5rem; }
+    .page-section:nth-child(even) { background: var(--light); }
+
+    .section-tag {
+      display: inline-block;
+      font-size: .72rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: #eff6ff;
+      padding: .25rem .75rem;
+      border-radius: 999px;
+      margin-bottom: .9rem;
+    }
+    .section-title {
+      font-size: clamp(1.4rem, 2.5vw, 2rem);
+      font-weight: 800; letter-spacing: -.02em;
+      color: var(--dark);
+      margin-bottom: 1rem;
+    }
+    .section-desc {
+      font-size: .97rem; color: var(--mid);
+      max-width: 700px;
+      margin-bottom: 2rem;
+    }
+    .container-narrow { max-width: 900px; margin: 0 auto; }
+
+    .abstract-box {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 2rem 2.5rem;
+      font-size: .97rem;
+      color: #334155;
+      line-height: 1.85;
+      box-shadow: var(--shadow);
+    }
+
+    .method-img-wrap {
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      margin-bottom: 1.8rem;
+      background: #f1f5f9;
+      min-height: 220px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .method-img-wrap img { width: 100%; display: block; }
+    .method-img-placeholder {
+      color: #cbd5e1; font-size: .9rem; padding: 4rem;
+      text-align: center;
+    }
+    .method-points { display: flex; flex-direction: column; gap: .9rem; }
+    .method-point {
+      display: flex; gap: 1rem; align-items: flex-start;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      box-shadow: 0 1px 6px rgba(0,0,0,.04);
+    }
+    .method-point-num {
+      flex-shrink: 0;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: .78rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: .1rem;
+    }
+    .method-point p { margin: 0; font-size: .93rem; color: #334155; }
+    .method-point strong { color: var(--dark); }
+
+    .results-tabs {
+      display: flex; gap: .5rem;
+      margin-bottom: 2rem;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0;
+    }
+    .results-tab {
+      padding: .55rem 1.3rem;
+      font-size: .88rem; font-weight: 600;
+      color: var(--mid);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all .2s;
+      background: none; border-top: none; border-left: none; border-right: none;
+    }
+    .results-tab.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+    .results-panel { display: none; }
+    .results-panel.active { display: block; }
+
+    .slider-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 1.25rem;
+    }
+    .slider-card {
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      background: #000;
+    }
+    .slider-card-label {
+      display: flex; justify-content: space-between;
+      padding: .5rem .9rem;
+      background: #fff;
+      font-size: .78rem; font-weight: 600; color: var(--mid);
+      border-top: 1px solid var(--border);
+    }
+    img-comparison-slider {
+      --divider-width: 2px;
+      --divider-color: #fff;
+      --default-handle-color: #fff;
+      --default-handle-shadow: 0 2px 12px rgba(0,0,0,.35);
+      width: 100%;
+      display: block;
+    }
+    img-comparison-slider img { width: 100%; display: block; object-fit: cover; }
+
+    .magnifier-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .magnifier-wrap {
+      position: relative;
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: crosshair;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      aspect-ratio: 1;
+      background: #f1f5f9;
+    }
+    .magnifier-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+      pointer-events: none; user-select: none;
+    }
+    .magnifier-lens {
+      position: absolute;
+      width: 130px; height: 130px;
+      border-radius: 50%;
+      border: 2.5px solid #fff;
+      box-shadow: 0 4px 20px rgba(0,0,0,.35);
+      pointer-events: none;
+      display: none;
+      overflow: hidden;
+      z-index: 10;
+      background-repeat: no-repeat;
+    }
+
+    .引用-box {
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: var(--radius);
+      padding: 1.6rem 2rem;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: .82rem;
+      line-height: 1.8;
+      position: relative;
+      overflow: hidden;
+      white-space: pre;
+    }
+    .引用-copy-btn {
+      position: absolute; top: .9rem; right: .9rem;
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.15);
+      color: #94a3b8;
+      border-radius: 6px;
+      padding: .3rem .7rem;
+      font-size: .75rem; cursor: pointer;
+      transition: all .2s;
+    }
+    .引用-copy-btn:hover { background: rgba(255,255,255,.18); color: #fff; }
+
+    .page-footer {
+      background: var(--dark);
+      color: #64748b;
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: .82rem;
+    }
+    .page-footer a { color: #94a3b8; text-decoration: none; }
+    .page-footer a:hover { color: #fff; }
+
+    #lightbox {
+      display: none; position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,.88);
+      align-items: center; justify-content: center;
+      cursor: zoom-out;
+    }
+    #lightbox.open { display: flex; }
+    #lightbox img {
+      max-width: 92vw; max-height: 92vh;
+      border-radius: 8px;
+      box-shadow: 0 8px 48px rgba(0,0,0,.6);
+    }
+    #lightboxClose {
+      position: fixed; top: 1.2rem; right: 1.5rem;
+      background: rgba(255,255,255,.12);
+      border: none; color: #fff;
+      width: 36px; height: 36px; border-radius: 50%;
+      font-size: 1rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .section-divider {
+      border: none; border-top: 1px solid var(--border);
+      margin: 0;
+    }
+
+    @media (max-width: 640px) {
+      .slider-grid { grid-template-columns: 1fr; }
+      .magnifier-grid { grid-template-columns: repeat(2, 1fr); }
+      .abstract-box { padding: 1.25rem 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="lightbox" onclick="closeLightbox()">
+  <button id="lightboxClose" onclick="closeLightbox()">✕</button>
+  <img id="lightboxImg" src="" alt="">
+</div>
+
+<nav class="top-nav">
+  <a href="#abstract">Abstract</a>
+  <a href="#method">Method</a>
+  <a href="#results">Results</a>
+  <a href="#引用">Citation</a>
+</nav>
+
+<section class="hero-section" id="top">
+  <div class="container-narrow">
+
+    <h1 class="paper-title">
+      <span class="hl">HDRFace:</span> Rethinking Face Restoration with High-Dimensional Representation
+    </h1>
+
+    <p class="authors">
+      <a href="#">Zirui Wang</a><sup>1,2</sup>&ensp;
+      <a href="#">Xianhui Lin*</a><sup>2</sup>&ensp;
+      <a href="#">Yi Dong</a><sup>2</sup>&ensp;
+      <a href="#">Bo Wei</a><sup>2</sup>&ensp;
+      <a href="#">Gangjian Zhang</a><sup>2</sup>&ensp;
+      <a href="#">Siteng Ma</a><sup>2</sup>&ensp;
+      <a href="#">Xing Liu</a><sup>2</sup>&ensp;
+      <a href="#">Hong Gu</a><sup>2</sup>&ensp;
+      <a href="#">Minjing Dong</a><sup>1†</sup>
+    </p>
+
+    <p class="affiliations">
+      <span>City University of Hong Kong &ensp;·&ensp; vivo BlueImage Lab, vivo Mobile Communication Co., Ltd</span><br>
+      <span><sup>*</sup> Project leader &ensp;·&ensp; <sup>†</sup> Corresponding Author</span>
+    </p>
+
+    <p class="emails">
+      zrwang23-c@my.cityu.edu.hk&ensp;·&ensp;xhlin129@gmail.com&ensp;·&ensp;minjdong@cityu.edu.hk
+    </p>
+
+    <p style="margin:.2rem 0 0; font-size:.85rem; color:#64748b; font-weight:600;">
+      Arxiv 2026
+    </p>
+
+    <div class="btn-row">
+      <a href="#" class="btn-link primary">
+        <i class="fas fa-file-pdf"></i> Paper
+      </a>
+      <a href="#" class="btn-link outline">
+        <i class="fab fa-github"></i> Code
+      </a>
+      <a href="#" class="btn-link outline">
+        <i class="fas fa-cube"></i> Model
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<section class="page-section" id="abstract">
+  <div class="container-narrow">
+    <span class="section-tag">Abstract</span>
+    <h2 class="section-title">Overview</h2>
+    <div class="abstract-box">
+      Face restoration under complex degradations still remains an ill-posed inverse problem due to severe information loss.
+      Although diffusion models benefit from strong generative priors, most methods still condition only on low-quality inputs,
+      making it difficult to recover identity-critical details under heavy degradations. In this work, we propose HDRFace,
+      a High-Dimensional Representation conditioned Face restoration framework that injects semantically rich priors into the conditional flow without modifying the generative backbone.
+      Our pipeline first obtains a structurally reliable intermediate restoration with an off-the-shelf restorer,
+      then uses a pretrained high-dimensional feature encoder to extract fine-grained facial representations from both the low-quality input and the intermediate result,
+      and injects them as additional conditions for generation. We further introduce SDFM,
+      a Structure-Detail aware adaptive Fusion Mechanism that emphasizes global constraints during structure modeling and strengthens representation guidance during detail synthesis,
+      balancing structural consistency and detail fidelity. To validate the generalization ability of our method,
+      we implement the proposed framework on two generative models, SD V2.1-base and Qwen-Image, and consistently observe stable and coherent performance gains across different architectures.
+    </div>
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<section class="page-section" id="method">
+  <div class="container-narrow">
+    <span class="section-tag">Method</span>
+    <h2 class="section-title">Method Overview</h2>
+    <p class="section-desc">
+      Overview of our proposed HDRFace framework.
+    </p>
+
+    <div class="method-img-wrap">
+      <img src="assets/images/pipeline.png" alt="Method Pipeline"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <div class="method-img-placeholder" style="display:none;">
+        Pipeline figure — place at <code>assets/images/pipeline.png</code>
+      </div>
+    </div>
+
+    <div class="method-points">
+      <div class="method-point">
+        <div class="method-point-num">1</div>
+        <p>
+          <strong>High-Dimensional Priors</strong> —
+          We propose a high-dimensional representation conditioned face restoration framework that injects DINOv2 semantic features into the conditional branch
+          to provide priors beyond low-quality inputs and ease the ill-posedness caused by missing information.
+        </p>
+      </div>
+      <div class="method-point">
+        <div class="method-point-num">2</div>
+        <p>
+          <strong>Adaptive Multi-Source Fusion</strong> —
+          We design an architecture-independent module SDFM that adaptively fuses low-quality inputs with high-dimensional features,
+          balancing structural consistency and detail fidelity without changing the generative backbone.
+        </p>
+      </div>
+      <div class="method-point">
+        <div class="method-point-num">3</div>
+        <p>
+          <strong>Backbone-Agnostic Generalization</strong> —
+          Extensive experiments on SD V2.1-base and Qwen-Image demonstrate strong generalization and architecture independence with consistent restoration quality gains.
+        </p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<section class="page-section" id="results">
+  <div class="container-narrow">
+    <span class="section-tag">Visual Results</span>
+    <h2 class="section-title">Visual Results</h2>
+    <p class="section-desc">
+      Qualitative comparison on the CelebA-Test dataset.
+    </p>
+
+    <div class="results-tabs">
+      <button class="results-tab active" onclick="switchTab(this,'panel-slider')">
+        🔀 Before / After Comparison
+      </button>
+      <button class="results-tab" onclick="switchTab(this,'panel-magnifier')">
+        🔍 Detail Magnifier
+      </button>
+    </div>
+
+    <!-- Panel 1: Slider -->
+    <div class="results-panel active" id="panel-slider">
+      <p style="font-size:.83rem;color:#94a3b8;margin-bottom:1.2rem;">
+        Drag the center divider to compare the degraded input (left) with our restored result (right).
+        Click any image to enlarge.
+      </p>
+      <div class="slider-grid">
+
+        <div class="slider-card">
+          <img-comparison-slider>
+            <figure slot="first" style="margin:0;">
+              <img src="assets/images/results/blur_1.png" alt="Degraded" onclick="openLightbox(this.src)">
+            </figure>
+            <figure slot="second" style="margin:0;">
+              <img src="assets/images/results/hq_1.png" alt="Restored" onclick="openLightbox(this.src)">
+            </figure>
+          </img-comparison-slider>
+          <div class="slider-card-label">
+            <span>⬅ Degraded Input</span>
+            <span>Ours (Restored) ➡</span>
+          </div>
+        </div>
+
+        <div class="slider-card">
+          <img-comparison-slider>
+            <figure slot="first" style="margin:0;">
+              <img src="assets/images/results/blur_2.png" alt="Degraded" onclick="openLightbox(this.src)">
+            </figure>
+            <figure slot="second" style="margin:0;">
+              <img src="assets/images/results/hq_2.png" alt="Restored" onclick="openLightbox(this.src)">
+            </figure>
+          </img-comparison-slider>
+          <div class="slider-card-label">
+            <span>⬅ Degraded Input</span>
+            <span>Ours (Restored) ➡</span>
+          </div>
+        </div>
+
+        <div class="slider-card">
+          <img-comparison-slider>
+            <figure slot="first" style="margin:0;">
+              <img src="assets/images/results/blur_3.png" alt="Degraded" onclick="openLightbox(this.src)">
+            </figure>
+            <figure slot="second" style="margin:0;">
+              <img src="assets/images/results/hq_3.png" alt="Restored" onclick="openLightbox(this.src)">
+            </figure>
+          </img-comparison-slider>
+          <div class="slider-card-label">
+            <span>⬅ Degraded Input</span>
+            <span>Ours (Restored) ➡</span>
+          </div>
+        </div>
+
+        <div class="slider-card">
+          <img-comparison-slider>
+            <figure slot="first" style="margin:0;">
+              <img src="assets/images/results/blur_4.png" alt="Degraded" onclick="openLightbox(this.src)">
+            </figure>
+            <figure slot="second" style="margin:0;">
+              <img src="assets/images/results/hq_4.png" alt="Restored" onclick="openLightbox(this.src)">
+            </figure>
+          </img-comparison-slider>
+          <div class="slider-card-label">
+            <span>⬅ Degraded Input</span>
+            <span>Ours (Restored) ➡</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="results-panel" id="panel-magnifier">
+      <p style="font-size:.83rem;color:#94a3b8;margin-bottom:1.2rem;">
+        Hover over any image to magnify the region under your cursor and inspect fine-grained details.
+      </p>
+      <div class="magnifier-grid" id="magnifierGrid">
+
+        <div class="magnifier-wrap" data-zoom="3">
+          <img src="assets/images/visual/hq_1.png" alt="Result 1">
+          <div class="magnifier-lens"></div>
+        </div>
+        <div class="magnifier-wrap" data-zoom="3">
+          <img src="assets/images/visual/hq_2.png" alt="Result 2">
+          <div class="magnifier-lens"></div>
+        </div>
+        <div class="magnifier-wrap" data-zoom="3">
+          <img src="assets/images/visual/hq_3.png" alt="Result 3">
+          <div class="magnifier-lens"></div>
+        </div>
+        <div class="magnifier-wrap" data-zoom="3">
+          <img src="assets/images/visual/hq_4.png" alt="Result 4">
+          <div class="magnifier-lens"></div>
+        </div>
+        <div class="magnifier-wrap" data-zoom="3">
+          <img src="assets/images/visual/hq_5.png" alt="Result 5">
+          <div class="magnifier-lens"></div>
+        </div>
+        <div class="magnifier-wrap" data-zoom="3">
+          <img src="assets/images/visual/hq_6.png" alt="Result 6">
+          <div class="magnifier-lens"></div>
+        </div>
+        <div class="magnifier-wrap" data-zoom="3">
+          <img src="assets/images/visual/hq_7.png" alt="Result 7">
+          <div class="magnifier-lens"></div>
+        </div>
+        <div class="magnifier-wrap" data-zoom="3">
+          <img src="assets/images/visual/hq_8.png" alt="Result 8">
+          <div class="magnifier-lens"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="section-divider">
+
+<section class="page-section" id="引用">
+  <div class="container-narrow">
+    <span class="section-tag">Citation</span>
+    <h2 class="section-title">Cite This Work</h2>
+    <p class="section-desc">
+      If you find our work useful, please consider citing:
+    </p>
+    <div class="引用-box" id="引用Box"><button class="引用-copy-btn" onclick="copyCitation()">Copy</button>@article{wang2026hdrface,
+  title     = {HDRFace: Rethinking Face Restoration with High-Dimensional Representation},
+  author    = {Zirui Wang and Xianhui Lin and Yi Dong and Bo Wei and
+               Gangjian Zhang and Siteng Ma and Xing Liu and Hong Gu and Minjing Dong},
+  journal   = {arXiv preprint},
+  year      = {2026}
+}</div>
+  </div>
+</section>
+
+<footer class="page-footer">
+  <p>
+    © 2026 · HDRFace ·
+    <a href="#">Paper</a> ·
+    <a href="#">Code</a>
+  </p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/index.js"></script>
+<script>
+/* ── Lightbox ── */
+function openLightbox(src) {
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('lightbox').classList.add('open');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+/* ── Tab switch ── */
+function switchTab(btn, panelId) {
+  document.querySelectorAll('.results-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.results-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(panelId).classList.add('active');
+}
+
+/* ── Citation copy ── */
+function copyCitation() {
+  const box = document.getElementById('引用Box');
+  const text = box.innerText.replace('Copy', '').trim();
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = box.querySelector('.引用-copy-btn');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+
+(function () {
+  const LENS_SIZE = 130;
+  const HALF = LENS_SIZE / 2;
+
+  function initMagnifier(wrap) {
+    const img  = wrap.querySelector('img');
+    const lens = wrap.querySelector('.magnifier-lens');
+    const zoom = parseFloat(wrap.dataset.zoom) || 3;
+
+    lens.style.backgroundRepeat = 'no-repeat';
+    lens.style.backgroundImage  = `url("${img.src}")`;
+
+    wrap.addEventListener('mouseenter', () => {
+      lens.style.backgroundImage = `url("${img.src}")`;
+      lens.style.display = 'block';
+    });
+
+    wrap.addEventListener('mouseleave', () => {
+      lens.style.display = 'none';
+    });
+
+    wrap.addEventListener('mousemove', e => {
+      const rect = wrap.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+
+      let lx = mx - HALF;
+      let ly = my - HALF;
+      lx = Math.max(0, Math.min(rect.width  - LENS_SIZE, lx));
+      ly = Math.max(0, Math.min(rect.height - LENS_SIZE, ly));
+      lens.style.left = lx + 'px';
+      lens.style.top  = ly + 'px';
+
+      const bgW = rect.width  * zoom;
+      const bgH = rect.height * zoom;
+      lens.style.backgroundSize = `${bgW}px ${bgH}px`;
+
+      const bgX = -(mx * zoom - HALF);
+      const bgY = -(my * zoom - HALF);
+      lens.style.backgroundPosition = `${bgX}px ${bgY}px`;
+    });
+  }
+
+  document.querySelectorAll('.magnifier-wrap').forEach(initMagnifier);
+})();
+</script>
+
+</body>
+</html>
